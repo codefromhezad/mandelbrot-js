@@ -1,0 +1,48 @@
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    canvas {
+        border: 1px solid #eee;
+        display: block;
+        margin: auto;
+    }
+</style>
+
+<script src="jquery.js"></script>
+<script src="Mandelbrot.js"></script>
+
+<canvas id="canvas1" width="400" height="400">
+    Random Canvas
+</canvas>
+
+<script type="text/javascript">
+    
+    var SCALE = 2.0;
+    var PX = - 0.5;
+    var PY = - 0.0;
+
+    var MAX_ITERATIONS = 2000;
+
+    var fractal = new Mandelbrot('canvas1');
+    
+    fractal.coloringAlgorithm = COLORING.SMOOTH_ESCAPE_TIME;
+    fractal.render(SCALE, PX, PY);
+
+
+    $('#canvas1').click( function(e) {
+        var posX = $(this).position().left,
+            posY = $(this).position().top;
+        
+        var mx = e.pageX - posX;
+        var my = e.pageY - posY;
+
+        var fx = PX + mx * _width * SCALE;
+        var fy = PY + my * _height * SCALE;
+        
+        frame(SCALE/2, fx, fy);
+    });
+
+</script>
