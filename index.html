@@ -9,6 +9,10 @@
         display: block;
         margin: auto;
     }
+
+    .rendering-indicator {
+        display: none;
+    }
 </style>
 
 <script src="jquery.js"></script>
@@ -24,25 +28,26 @@
     var PX = - 0.5;
     var PY = - 0.0;
 
-    var MAX_ITERATIONS = 2000;
+    var MAX_ITERATIONS = 1000;
 
     var fractal = new Mandelbrot('canvas1');
     
     fractal.coloringAlgorithm = COLORING.SMOOTH_ESCAPE_TIME;
     fractal.render(SCALE, PX, PY);
 
-
     $('#canvas1').click( function(e) {
-        var posX = $(this).position().left,
-            posY = $(this).position().top;
+        var posX = $(this).offset().left,
+            posY = $(this).offset().top;
         
-        var mx = e.pageX - posX;
-        var my = e.pageY - posY;
+        var m = {
+            x: e.pageX - posX,
+            y: e.pageY - posY
+        };
 
-        var fx = PX + mx * _width * SCALE;
-        var fy = PY + my * _height * SCALE;
-        
-        frame(SCALE/2, fx, fy);
+        var f = fractal.canvasToFractalCoords(m);
+
+        SCALE /= 2;
+        fractal.render(SCALE, f.x, f.y);
     });
 
 </script>

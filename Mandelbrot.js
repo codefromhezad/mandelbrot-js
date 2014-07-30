@@ -15,6 +15,7 @@ var COLORING = {
 function Mandelbrot(canvas_id) {
 
     this.palette = [];
+    this.coordsMap = [];
     
     this.element = document.getElementById(canvas_id);
     this.context = this.element.getContext("2d");
@@ -31,12 +32,18 @@ function Mandelbrot(canvas_id) {
 
     this.buildDefaultPalette = function() {
         for(var p = 0; p < 512; p++) {
-            this.palette[p] = [ Math.min(p, 255), p/2, 200 ];
+            var a = Math.PI * 2 * p / 512
+            this.palette[p] = [ 127 + 128 * Math.cos(a), 128 - 128 * Math.sin(a), 150 ];
         }
     }
 
     this.getPaletteColor = function(p) {
-        return this.palette[ Math.min(this.palette.length - 1, Math.max(0, p)) | 0 ];
+        //return this.palette[ Math.max(0, Math.min(p, this.palette.length - 1)) | 0 ];
+        return this.palette[ Math.max(0, p % (this.palette.length - 1)) | 0 ];
+    }
+
+    this.canvasToFractalCoords = function(p) {
+        return this.coordsMap[p.y | 0][p.x | 0];
     }
 
     this.render = function(scale, px, py) {
@@ -55,9 +62,12 @@ function Mandelbrot(canvas_id) {
         for (var j = 0; j < this.height; j++) {
             
             var x = px - scale_2;
+            this.coordsMap[j] = [];
 
             for (var i = 0; i < this.width; i++) {
                 
+                this.coordsMap[j][i] = {x: x, y: y};
+
                 var Zx = 0.0;
                 var Zy = 0.0;
 
@@ -73,7 +83,6 @@ function Mandelbrot(canvas_id) {
 
                     if( x_y > CONVERGENCE_RADIUS_SQ ) {
                         converge = false;
-                        x_y = Zx * Zx + Zy * Zy;
                         break;
                     }
                 }
@@ -83,12 +92,22 @@ function Mandelbrot(canvas_id) {
                     var g = 0.0;
                     var b = 0.0;
                 } else {
+                    Zy = y + 2.0 * Zx * Zy;
+                    Zx = x + x_y;
+                    x_y = Zx * Zx - Zy * Zy;
+
+                    Zy = y + 2.0 * Zx * Zy;
+                    Zx = x + x_y;
+                    //x_y = Zx * Zx - Zy * Zy;
+
+                    x_y = Zx * Zx + Zy * Zy;
+
                     switch( this.coloringAlgorithm ) {
                         case COLORING.ESCAPE_TIME:
                             var cn = 80 * this.palette.length * n / MAX_ITERATIONS;
                             break;
                         case COLORING.SMOOTH_ESCAPE_TIME:
-                            var cn = 80 * this.palette.length * (n - log2( log2( Math.sqrt(x_y) ) ) ) / MAX_ITERATIONS;
+                            var cn = 80 * this.palette.length * (n - Math.log( Math.log( Math.sqrt(x_y) ) ) * TO_LN2 ) / MAX_ITERATIONS;
                             break;
                         default:
                             console.error('A coloring algorithm must be set.');
