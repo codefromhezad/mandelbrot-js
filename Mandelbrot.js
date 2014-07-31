@@ -23,6 +23,7 @@ function Mandelbrot(canvas_id) {
     this.width  = this.element.width;
     this.height = this.element.height;
 
+    this.paletteMultiplier = 10;
     this.coloringAlgorithm = COLORING.SMOOTH_ESCAPE_TIME; 
 
     var _width  = 1.0 / this.width;
@@ -39,7 +40,7 @@ function Mandelbrot(canvas_id) {
 
     this.getPaletteColor = function(p) {
         //return this.palette[ Math.max(0, Math.min(p, this.palette.length - 1)) | 0 ];
-        return this.palette[ Math.max(0, 10 * this.palette.length * p % (this.palette.length - 1)) | 0 ];
+        return this.palette[ Math.max(0, this.paletteMultiplier * this.palette.length * p % (this.palette.length - 1)) | 0 ];
     }
 
     this.canvasToFractalCoords = function(p) {

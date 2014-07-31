@@ -26,7 +26,11 @@
     <dt>Scale</dt><dd class="scale">...<dd/>
     <dt>Position</dt><dd class="position">...<dd/>
     <dt>Coloring Algorithm</dt><dd class="coloring">...<dd/>
+    <dt>Max Iterations</dt><dd class="max-iterations"><input type="text" /><dd/>
+    <dt>Palette Multiplier</dt><dd class="palette-mult"><input type="text" /><dd/>
 </dl>
+
+<button class="update">Update</button>
 
 <script type="text/javascript">
     
@@ -41,6 +45,8 @@
     $('.fractal-infos .scale').text(SCALE);
     $('.fractal-infos .position').text(PX+', '+PY);
     $('.fractal-infos .coloring').text(fractal.coloringAlgorithm);
+    $('.fractal-infos .palette-mult input').val(fractal.paletteMultiplier);
+    $('.fractal-infos .max-iterations input').val(MAX_ITERATIONS);
 
     fractal.render(SCALE, PX, PY);
 
@@ -55,12 +61,23 @@
 
         var f = fractal.canvasToFractalCoords(m);
         SCALE /= 2;
+        PX = f.x;
+        PY = f.y;
 
         $('.fractal-infos .scale').text(SCALE);
-        $('.fractal-infos .position').text(f.x+', '+f.y);
-        $('.fractal-infos .coloring').text(fractal.coloringAlgorithm);
+        $('.fractal-infos .position').text(PX+', '+PY);
 
-        fractal.render(SCALE, f.x, f.y);
+        fractal.render(SCALE, PX, PY);
     });
+
+    $('button.update').click( function(e) {
+        e.preventDefault();
+        
+        fractal.paletteMultiplier = parseInt($('.fractal-infos .palette-mult input').val());
+        MAX_ITERATIONS = parseInt($('.fractal-infos .max-iterations input').val());
+        fractal.render(SCALE, PX, PY);
+
+        return false;
+    })
 
 </script>
