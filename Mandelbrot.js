@@ -33,13 +33,13 @@ function Mandelbrot(canvas_id) {
     this.buildDefaultPalette = function() {
         for(var p = 0; p < 512; p++) {
             var a = Math.PI * 2 * p / 512
-            this.palette[p] = [ 127 + 128 * Math.cos(a), 128 - 128 * Math.sin(a), 150 ];
+            this.palette[p] = [ 128 - 127 * Math.cos(a), 128 - 127 * Math.cos(a), 200 ];
         }
     }
 
     this.getPaletteColor = function(p) {
         //return this.palette[ Math.max(0, Math.min(p, this.palette.length - 1)) | 0 ];
-        return this.palette[ Math.max(0, p % (this.palette.length - 1)) | 0 ];
+        return this.palette[ Math.max(0, 20 * this.palette.length * p % (this.palette.length - 1)) | 0 ];
     }
 
     this.canvasToFractalCoords = function(p) {
@@ -50,6 +50,8 @@ function Mandelbrot(canvas_id) {
         var scale_2 = scale / 2;
         var scale_h = _height * scale;
         var scale_w = _width * scale;
+
+        var iterationsMap = [];
 
         if( ! this.palette.length ) {
             this.buildDefaultPalette();
@@ -63,6 +65,7 @@ function Mandelbrot(canvas_id) {
             
             var x = px - scale_2;
             this.coordsMap[j] = [];
+            iterationsMap[j] = [];
 
             for (var i = 0; i < this.width; i++) {
                 
@@ -73,6 +76,7 @@ function Mandelbrot(canvas_id) {
 
                 var converge = true;
                 var x_y = Zx * Zx - Zy * Zy;
+                var mod = Zx * Zx + Zy * Zy;
 
                 for(var n = 0; n < MAX_ITERATIONS; n++) {
                     //Z = Z * Z + c
@@ -80,41 +84,46 @@ function Mandelbrot(canvas_id) {
                     Zx = x + x_y;
 
                     x_y = Zx * Zx - Zy * Zy;
+                    mod = Zx * Zx + Zy * Zy;
 
-                    if( x_y > CONVERGENCE_RADIUS_SQ ) {
+                    if( mod > CONVERGENCE_RADIUS_SQ ) {
                         converge = false;
                         break;
                     }
                 }
 
                 if( converge ) {
-                    var r = 0.0;
-                    var g = 0.0;
-                    var b = 0.0;
+                    iterationsMap[j][i] = 0;
                 } else {
-                    Zy = y + 2.0 * Zx * Zy;
-                    Zx = x + x_y;
-                    x_y = Zx * Zx - Zy * Zy;
-
-                    Zy = y + 2.0 * Zx * Zy;
-                    Zx = x + x_y;
-                    //x_y = Zx * Zx - Zy * Zy;
-
-                    x_y = Zx * Zx + Zy * Zy;
 
                     switch( this.coloringAlgorithm ) {
                         case COLORING.ESCAPE_TIME:
-                            var cn = 80 * this.palette.length * n / MAX_ITERATIONS;
+                            iterationsMap[j][i] = n / MAX_ITERATIONS;
                             break;
                         case COLORING.SMOOTH_ESCAPE_TIME:
-                            var cn = 80 * this.palette.length * (n - Math.log( Math.log( Math.sqrt(x_y) ) ) * TO_LN2 ) / MAX_ITERATIONS;
+                            iterationsMap[j][i] = (n - Math.log( Math.log( Math.sqrt(mod) ) ) * TO_LN2 ) / MAX_ITERATIONS;
                             break;
                         default:
                             console.error('A coloring algorithm must be set.');
                             return;
                     }
+                }
 
-                    var p = this.getPaletteColor(cn);
+                x += scale_w;
+            }
+
+            y += scale_h;
+        }
+        
+        for (var j = 0; j < this.height; j++) {
+            for (var i = 0; i < this.width; i++) {
+
+                if( iterationsMap[j][i] == 0 ) {
+                    var r = 0;
+                    var g = 0;
+                    var b = 0;
+                } else {
+                    var p = this.getPaletteColor(iterationsMap[j][i]);
 
                     var r = p[0] | 0;
                     var g = p[1] | 0;
@@ -125,11 +134,7 @@ function Mandelbrot(canvas_id) {
                 imageData.data[imgIndex++] = g;
                 imageData.data[imgIndex++] = b;
                 imageData.data[imgIndex++] = 255;
-
-                x += scale_w;
             }
-
-            y += scale_h;
         }
 
         this.context.putImageData(imageData, 0, 0);
