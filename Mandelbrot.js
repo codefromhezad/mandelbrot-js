@@ -37,9 +37,9 @@ function Mandelbrot(canvas_id) {
         }
     }
 
-    this.getPaletteColor = function(p, f0, f1) {
+    this.getPaletteColor = function(p) {
         //return this.palette[ Math.max(0, Math.min(p, this.palette.length - 1)) | 0 ];
-        return this.palette[ Math.max(0, 20 * this.palette.length * (f0 + p * (f1 - f0)) % (this.palette.length - 1)) | 0 ];
+        return this.palette[ Math.max(0, 10 * this.palette.length * p % (this.palette.length - 1)) | 0 ];
     }
 
     this.canvasToFractalCoords = function(p) {
@@ -56,9 +56,6 @@ function Mandelbrot(canvas_id) {
         if( ! this.palette.length ) {
             this.buildDefaultPalette();
         }
-
-        var topIteration = 0;
-        var bottomIteration = MAX_ITERATIONS;
 
         var imgIndex = 0;
 
@@ -83,7 +80,7 @@ function Mandelbrot(canvas_id) {
 
                 for(var n = 0; n < MAX_ITERATIONS; n++) {
                     //Z = Z * Z + c
-                    Zy = y + 2.0 * Zx * Zy;
+                    Zy = y + 2 * Zx * Zy;
                     Zx = x + x_y;
 
                     x_y = Zx * Zx - Zy * Zy;
@@ -98,13 +95,6 @@ function Mandelbrot(canvas_id) {
                 if( converge ) {
                     iterationsMap[j][i] = 0;
                 } else {
-
-                    if( n > topIteration ) {
-                        topIteration = n;
-                    }
-                    if( n < bottomIteration ) {
-                        bottomIteration = n;
-                    }
                     switch( this.coloringAlgorithm ) {
                         case COLORING.ESCAPE_TIME:
                             iterationsMap[j][i] = n / MAX_ITERATIONS;
@@ -132,7 +122,7 @@ function Mandelbrot(canvas_id) {
                     var g = 0;
                     var b = 0;
                 } else {
-                    var p = this.getPaletteColor(iterationsMap[j][i], bottomIteration / MAX_ITERATIONS, topIteration / MAX_ITERATIONS);
+                    var p = this.getPaletteColor(iterationsMap[j][i]);
 
                     var r = p[0] | 0;
                     var g = p[1] | 0;
