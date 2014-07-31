@@ -8,8 +8,8 @@ function log2(p) {
 }
 
 var COLORING = {
-    ESCAPE_TIME: 1,
-    SMOOTH_ESCAPE_TIME: 2 
+    ESCAPE_TIME: 'Escape Time',
+    SMOOTH_ESCAPE_TIME: 'Smooth Escape Time' 
 };
 
 function Mandelbrot(canvas_id) {
@@ -32,14 +32,14 @@ function Mandelbrot(canvas_id) {
 
     this.buildDefaultPalette = function() {
         for(var p = 0; p < 512; p++) {
-            var a = Math.PI * 2 * p / 512
-            this.palette[p] = [ 128 - 127 * Math.cos(a), 128 - 127 * Math.cos(a), 200 ];
+            var a = Math.PI * 2.0 * p / 512
+            this.palette[p] = [ 128 - 127 * Math.cos(a), 128 - 127 * Math.cos(a), 128 + 127 * Math.sin(a) ];
         }
     }
 
-    this.getPaletteColor = function(p) {
+    this.getPaletteColor = function(p, f0, f1) {
         //return this.palette[ Math.max(0, Math.min(p, this.palette.length - 1)) | 0 ];
-        return this.palette[ Math.max(0, 20 * this.palette.length * p % (this.palette.length - 1)) | 0 ];
+        return this.palette[ Math.max(0, 20 * this.palette.length * (f0 + p * (f1 - f0)) % (this.palette.length - 1)) | 0 ];
     }
 
     this.canvasToFractalCoords = function(p) {
@@ -56,6 +56,9 @@ function Mandelbrot(canvas_id) {
         if( ! this.palette.length ) {
             this.buildDefaultPalette();
         }
+
+        var topIteration = 0;
+        var bottomIteration = MAX_ITERATIONS;
 
         var imgIndex = 0;
 
@@ -96,6 +99,12 @@ function Mandelbrot(canvas_id) {
                     iterationsMap[j][i] = 0;
                 } else {
 
+                    if( n > topIteration ) {
+                        topIteration = n;
+                    }
+                    if( n < bottomIteration ) {
+                        bottomIteration = n;
+                    }
                     switch( this.coloringAlgorithm ) {
                         case COLORING.ESCAPE_TIME:
                             iterationsMap[j][i] = n / MAX_ITERATIONS;
@@ -123,7 +132,7 @@ function Mandelbrot(canvas_id) {
                     var g = 0;
                     var b = 0;
                 } else {
-                    var p = this.getPaletteColor(iterationsMap[j][i]);
+                    var p = this.getPaletteColor(iterationsMap[j][i], bottomIteration / MAX_ITERATIONS, topIteration / MAX_ITERATIONS);
 
                     var r = p[0] | 0;
                     var g = p[1] | 0;

@@ -5,13 +5,13 @@
     }
 
     canvas {
-        border: 1px solid #eee;
         display: block;
-        margin: auto;
+        float: left;
     }
 
-    .rendering-indicator {
-        display: none;
+    dl.fractal-infos {
+        display: block;
+        float: left;
     }
 </style>
 
@@ -22,6 +22,12 @@
     Random Canvas
 </canvas>
 
+<dl class="fractal-infos">
+    <dt>Scale</dt><dd class="scale">...<dd/>
+    <dt>Position</dt><dd class="position">...<dd/>
+    <dt>Coloring Algorithm</dt><dd class="coloring">...<dd/>
+</dl>
+
 <script type="text/javascript">
     
     var SCALE = 2.0;
@@ -31,8 +37,11 @@
     var MAX_ITERATIONS = 1000;
 
     var fractal = new Mandelbrot('canvas1');
-    
-    fractal.coloringAlgorithm = COLORING.SMOOTH_ESCAPE_TIME;
+
+    $('.fractal-infos .scale').text(SCALE);
+    $('.fractal-infos .position').text(PX+', '+PY);
+    $('.fractal-infos .coloring').text(fractal.coloringAlgorithm);
+
     fractal.render(SCALE, PX, PY);
 
     $('#canvas1').click( function(e) {
@@ -45,8 +54,12 @@
         };
 
         var f = fractal.canvasToFractalCoords(m);
-
         SCALE /= 2;
+
+        $('.fractal-infos .scale').text(SCALE);
+        $('.fractal-infos .position').text(f.x+', '+f.y);
+        $('.fractal-infos .coloring').text(fractal.coloringAlgorithm);
+
         fractal.render(SCALE, f.x, f.y);
     });
 
