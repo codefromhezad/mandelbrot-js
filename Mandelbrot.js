@@ -76,16 +76,23 @@ function Mandelbrot(canvas_id) {
                 var Zy = 0.0;
 
                 var converge = true;
-                var x_y = Zx * Zx - Zy * Zy;
-                var mod = Zx * Zx + Zy * Zy;
+                var xx = Zx * Zx;
+                var yy = Zy * Zy;
+                var mod = xx + yy;
 
                 for(var n = 0; n < MAX_ITERATIONS; n++) {
                     //Z = Z * Z + c
-                    Zy = y + 2 * Zx * Zy;
-                    Zx = x + x_y;
+                    //Zy = y + 2 * Zx * Zy;
+                    //Zx = x + xx - yy;
 
-                    x_y = Zx * Zx - Zy * Zy;
-                    mod = Zx * Zx + Zy * Zy;
+                    //Z = Z * Z * Z + c
+                    var nZy = y + 3 * xx * Zy - yy * Zy;
+                    Zx = x + xx * Zx - 3 * Zx * yy;
+                    Zy = nZy;
+
+                    xx = Zx * Zx;
+                    yy = Zy * Zy;
+                    mod = xx + yy;
 
                     if( mod > CONVERGENCE_RADIUS_SQ ) {
                         converge = false;
@@ -101,7 +108,7 @@ function Mandelbrot(canvas_id) {
                             iterationsMap[j][i] = n / MAX_ITERATIONS;
                             break;
                         case COLORING.SMOOTH_ESCAPE_TIME:
-                            iterationsMap[j][i] = (n - Math.log( Math.log( Math.sqrt(mod) ) ) * TO_LN2 ) / MAX_ITERATIONS;
+                            iterationsMap[j][i] = (n - Math.log( Math.log( Math.sqrt(mod) ) ) / Math.log(3) ) / MAX_ITERATIONS;
                             break;
                         default:
                             console.error('A coloring algorithm must be set.');
