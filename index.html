@@ -25,7 +25,8 @@
 <dl class="fractal-infos">
     <dt>Scale</dt><dd class="scale">...<dd/>
     <dt>Position</dt><dd class="position">...<dd/>
-    <dt>Coloring Algorithm</dt><dd class="coloring">...<dd/>
+    <dt>Fractal type</dt><dd class="fractype"><select></select><dd/>
+    <dt>Coloring Algorithm</dt><dd class="coloring"><select></select><dd/>
     <dt>Max Iterations</dt><dd class="max-iterations"><input type="text" /><dd/>
     <dt>Palette Multiplier</dt><dd class="palette-mult"><input type="text" /><dd/>
 </dl>
@@ -44,9 +45,18 @@
 
     $('.fractal-infos .scale').text(SCALE);
     $('.fractal-infos .position').text(PX+', '+PY);
-    $('.fractal-infos .coloring').text(fractal.coloringAlgorithm);
     $('.fractal-infos .palette-mult input').val(fractal.paletteMultiplier);
     $('.fractal-infos .max-iterations input').val(MAX_ITERATIONS);
+
+    for(var i in FRACTAL) {
+        $('.fractal-infos .fractype select').append('<option value="'+FRACTAL[i]+'">'+FRACTAL[i]+'</option>')
+    }
+    $('.fractal-infos .fractype select').val(FRACTAL.MANDELBROT);
+
+    for(var i in COLORING) {
+        $('.fractal-infos .coloring select').append('<option value="'+COLORING[i]+'">'+COLORING[i]+'</option>')
+    }
+    $('.fractal-infos .coloring select').val(fractal.coloringAlgorithm);
 
     fractal.render(SCALE, PX, PY);
 
@@ -73,8 +83,11 @@
     $('button.update').click( function(e) {
         e.preventDefault();
         
+        fractal.fractalType = $('.fractal-infos .fractype select').val();
+        fractal.coloringAlgorithm = $('.fractal-infos .coloring select').val();
         fractal.paletteMultiplier = parseInt($('.fractal-infos .palette-mult input').val());
         MAX_ITERATIONS = parseInt($('.fractal-infos .max-iterations input').val());
+        
         fractal.render(SCALE, PX, PY);
 
         return false;

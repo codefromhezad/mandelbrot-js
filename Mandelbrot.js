@@ -12,6 +12,11 @@ var COLORING = {
     SMOOTH_ESCAPE_TIME: 'Smooth Escape Time' 
 };
 
+var FRACTAL = {
+    MANDELBROT: 'Mandelbrot | Z = Z * Z + c',
+    MANDELBROT_CUBIC: 'Cubic Mandelbrot | Z = Z * Z * Z + c'
+}
+
 function Mandelbrot(canvas_id) {
 
     this.palette = [];
@@ -25,6 +30,8 @@ function Mandelbrot(canvas_id) {
 
     this.paletteMultiplier = 10;
     this.coloringAlgorithm = COLORING.SMOOTH_ESCAPE_TIME; 
+
+    this.fractalType = FRACTAL.MANDELBROT;
 
     var _width  = 1.0 / this.width;
     var _height = 1.0 / this.height;
@@ -80,35 +87,58 @@ function Mandelbrot(canvas_id) {
                 var yy = Zy * Zy;
                 var mod = xx + yy;
 
-                for(var n = 0; n < MAX_ITERATIONS; n++) {
-                    //Z = Z * Z + c
-                    //Zy = y + 2 * Zx * Zy;
-                    //Zx = x + xx - yy;
+                switch(this.fractalType) {
+                    case FRACTAL.MANDELBROT:
+                        for(var n = 0; n < MAX_ITERATIONS; n++) {
+                            //Z = Z * Z + c
+                            Zy = y + 2 * Zx * Zy;
+                            Zx = x + xx - yy;
 
-                    //Z = Z * Z * Z + c
-                    var nZy = y + 3 * xx * Zy - yy * Zy;
-                    Zx = x + xx * Zx - 3 * Zx * yy;
-                    Zy = nZy;
+                            xx = Zx * Zx;
+                            yy = Zy * Zy;
+                            mod = xx + yy;
 
-                    xx = Zx * Zx;
-                    yy = Zy * Zy;
-                    mod = xx + yy;
-
-                    if( mod > CONVERGENCE_RADIUS_SQ ) {
-                        converge = false;
+                            if( mod > CONVERGENCE_RADIUS_SQ ) {
+                                converge = false;
+                                break;
+                            }
+                        }
                         break;
-                    }
+                    case FRACTAL.MANDELBROT_CUBIC:
+                        for(var n = 0; n < MAX_ITERATIONS; n++) {
+                            //Z = Z * Z * Z + c
+                            Zx = x + xx * Zx - 3 * Zx * yy;
+                            Zy = y + 3 * xx * Zy - yy * Zy;
+
+                            xx = Zx * Zx;
+                            yy = Zy * Zy;
+                            mod = xx + yy;
+
+                            if( mod > CONVERGENCE_RADIUS_SQ ) {
+                                converge = false;
+                                break;
+                            }
+                        }
+                        break;
+                    default:
+                        console.error('A fractal type must be set');
                 }
+                
 
                 if( converge ) {
-                    iterationsMap[j][i] = 0;
+                    iterationsMap[j][i] = -1;
                 } else {
                     switch( this.coloringAlgorithm ) {
                         case COLORING.ESCAPE_TIME:
                             iterationsMap[j][i] = n / MAX_ITERATIONS;
                             break;
                         case COLORING.SMOOTH_ESCAPE_TIME:
-                            iterationsMap[j][i] = (n - Math.log( Math.log( Math.sqrt(mod) ) ) / Math.log(3) ) / MAX_ITERATIONS;
+                            var lnDivisor;
+                            switch(this.fractalType) {
+                                case FRACTAL.MANDELBROT: lnDivisor = TO_LN2; break;
+                                case FRACTAL.MANDELBROT_CUBIC: lnDivisor = 1.0 / Math.log(3); break;
+                            }
+                            iterationsMap[j][i] = (n - Math.log( Math.log( Math.sqrt(mod) ) ) * lnDivisor ) / MAX_ITERATIONS;
                             break;
                         default:
                             console.error('A coloring algorithm must be set.');
@@ -125,7 +155,7 @@ function Mandelbrot(canvas_id) {
         for (var j = 0; j < this.height; j++) {
             for (var i = 0; i < this.width; i++) {
 
-                if( iterationsMap[j][i] == 0 ) {
+                if( iterationsMap[j][i] == -1 ) {
                     var r = 0;
                     var g = 0;
                     var b = 0;
