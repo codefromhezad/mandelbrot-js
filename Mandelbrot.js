@@ -1,6 +1,6 @@
 
 var TO_LN2 = 1.0 / Math.LN2;
-var CONVERGENCE_RADIUS = 2;
+var CONVERGENCE_RADIUS = 4;
 var CONVERGENCE_RADIUS_SQ = CONVERGENCE_RADIUS * CONVERGENCE_RADIUS;
 
 function log2(p) {
@@ -29,7 +29,7 @@ function Mandelbrot(canvas_id) {
     this.width  = this.element.width;
     this.height = this.element.height;
 
-    this.paletteMultiplier = 10;
+    this.paletteOffset = 10;
     this.coloringAlgorithm = COLORING.SMOOTH_ESCAPE_TIME; 
 
     this.fractalType = FRACTAL.MANDELBROT;
@@ -47,7 +47,7 @@ function Mandelbrot(canvas_id) {
     }
 
     this.getPaletteColor = function(p) {
-        return this.palette[ (this.paletteMultiplier * this.palette.length * Math.max(0, p)) % (this.palette.length - 1) | 0 ];
+        return this.palette[ (this.palette.length * Math.max(0, p + this.paletteOffset)) % (this.palette.length - 1) | 0 ];
     }
 
     this.canvasToFractalCoords = function(p) {
@@ -166,7 +166,7 @@ function Mandelbrot(canvas_id) {
                                 lnDivisor = 1.0 / Math.log(3);
                             }
 
-                            iterationsMap[j][i] = (n - log2( log2( Math.sqrt(mod) ) ) ) / MAX_ITERATIONS;
+                            iterationsMap[j][i] = (n + 1 + Math.log(Math.log(CONVERGENCE_RADIUS_SQ) - Math.log(Math.log(Math.sqrt(mod)))) * lnDivisor) / MAX_ITERATIONS;
                             break;
                         default:
                             console.error('A coloring algorithm must be set.');

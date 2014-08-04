@@ -28,7 +28,7 @@
     <dt>Fractal type</dt><dd class="fractype"><select></select><dd/>
     <dt>Coloring Algorithm</dt><dd class="coloring"><select></select><dd/>
     <dt>Max Iterations</dt><dd class="max-iterations"><input type="text" /><dd/>
-    <dt>Palette Multiplier</dt><dd class="palette-mult"><input type="text" /><dd/>
+    <dt>Palette Offset</dt><dd class="palette-offset"><input type="text" /><dd/>
 </dl>
 
 <button class="update">Update</button>
@@ -45,7 +45,7 @@
 
     $('.fractal-infos .scale').text(SCALE);
     $('.fractal-infos .position').text(PX+', '+PY);
-    $('.fractal-infos .palette-mult input').val(fractal.paletteMultiplier);
+    $('.fractal-infos .palette-offset input').val(fractal.paletteOffset);
     $('.fractal-infos .max-iterations input').val(MAX_ITERATIONS);
 
     for(var i in FRACTAL) {
@@ -85,7 +85,7 @@
         
         fractal.fractalType = $('.fractal-infos .fractype select').val();
         fractal.coloringAlgorithm = $('.fractal-infos .coloring select').val();
-        fractal.paletteMultiplier = parseInt($('.fractal-infos .palette-mult input').val());
+        fractal.paletteOffset = parseInt($('.fractal-infos .palette-offset input').val());
         MAX_ITERATIONS = parseInt($('.fractal-infos .max-iterations input').val());
         
         fractal.render(SCALE, PX, PY);
