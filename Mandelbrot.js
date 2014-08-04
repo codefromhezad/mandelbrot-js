@@ -13,8 +13,9 @@ var COLORING = {
 };
 
 var FRACTAL = {
-    MANDELBROT: 'Mandelbrot | Z = Z * Z + c',
-    MANDELBROT_CUBIC: 'Cubic Mandelbrot | Z = Z * Z * Z + c'
+    MANDELBROT: 'Mandelbrot',
+    MANDELBROT_CUBIC: 'Cubic Mandelbrot',
+    JULIA: 'Julia [c = -0.4 + 0.6i]',
 }
 
 function Mandelbrot(canvas_id) {
@@ -41,13 +42,12 @@ function Mandelbrot(canvas_id) {
     this.buildDefaultPalette = function() {
         for(var p = 0; p < 512; p++) {
             var a = Math.PI * 2.0 * p / 512
-            this.palette[p] = [ 128 - 127 * Math.cos(a), 128 - 127 * Math.cos(a), 128 + 127 * Math.sin(a) ];
+            this.palette[p] = [ 128 - 127 * Math.cos(a), 128 - 127 * Math.sin(a), 128 - 127 * Math.sin(a) ];
         }
     }
 
     this.getPaletteColor = function(p) {
-        //return this.palette[ Math.max(0, Math.min(p, this.palette.length - 1)) | 0 ];
-        return this.palette[ Math.max(0, this.paletteMultiplier * this.palette.length * p % (this.palette.length - 1)) | 0 ];
+        return this.palette[ (this.paletteMultiplier * this.palette.length * Math.max(0, p)) % (this.palette.length - 1) | 0 ];
     }
 
     this.canvasToFractalCoords = function(p) {
@@ -72,6 +72,7 @@ function Mandelbrot(canvas_id) {
         for (var j = 0; j < this.height; j++) {
             
             var x = px - scale_2;
+
             this.coordsMap[j] = [];
             iterationsMap[j] = [];
 
@@ -120,6 +121,33 @@ function Mandelbrot(canvas_id) {
                             }
                         }
                         break;
+                    case FRACTAL.JULIA:
+                        Zx = x;
+                        Zy = y;
+
+                        var cx = -0.4;
+                        var cy = 0.6;
+
+                        var xx = Zx * Zx;
+                        var yy = Zy * Zy;
+                        var mod = xx + yy;
+
+                        for(var n = 0; n < MAX_ITERATIONS; n++) {
+                            //Z = Z * Z + c
+                            Zy = cy + 2 * Zx * Zy;
+                            Zx = cx + xx - yy;
+
+                            xx = Zx * Zx;
+                            yy = Zy * Zy;
+
+                            mod = xx + yy;
+
+                            if( mod > CONVERGENCE_RADIUS_SQ ) {
+                                converge = false;
+                                break;
+                            }
+                        }
+                        break;
                     default:
                         console.error('A fractal type must be set');
                 }
@@ -133,12 +161,12 @@ function Mandelbrot(canvas_id) {
                             iterationsMap[j][i] = n / MAX_ITERATIONS;
                             break;
                         case COLORING.SMOOTH_ESCAPE_TIME:
-                            var lnDivisor;
-                            switch(this.fractalType) {
-                                case FRACTAL.MANDELBROT: lnDivisor = TO_LN2; break;
-                                case FRACTAL.MANDELBROT_CUBIC: lnDivisor = 1.0 / Math.log(3); break;
+                            var lnDivisor = TO_LN2;
+                            if(this.fractalType == FRACTAL.MANDELBROT_CUBIC) {
+                                lnDivisor = 1.0 / Math.log(3);
                             }
-                            iterationsMap[j][i] = (n - Math.log( Math.log( Math.sqrt(mod) ) ) * lnDivisor ) / MAX_ITERATIONS;
+
+                            iterationsMap[j][i] = (n - log2( log2( Math.sqrt(mod) ) ) ) / MAX_ITERATIONS;
                             break;
                         default:
                             console.error('A coloring algorithm must be set.');
