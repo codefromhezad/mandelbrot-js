@@ -16,6 +16,7 @@
 </style>
 
 <script src="jquery.js"></script>
+<script src="plugins.js"></script>
 <script src="Mandelbrot.js"></script>
 
 <canvas id="canvas1" width="600" height="600">
@@ -48,10 +49,10 @@
     $('.fractal-infos .palette-offset input').val(fractal.paletteOffset);
     $('.fractal-infos .max-iterations input').val(MAX_ITERATIONS);
 
-    for(var i in FRACTAL) {
-        $('.fractal-infos .fractype select').append('<option value="'+FRACTAL[i]+'">'+FRACTAL[i]+'</option>')
+    for(var i in Plugins) {
+        $('.fractal-infos .fractype select').append('<option value="'+i+'">'+Plugins[i].desc+'</option>')
     }
-    $('.fractal-infos .fractype select').val(FRACTAL.MANDELBROT);
+    $('.fractal-infos .fractype select option[value=mandelbrot]').attr('selected', 'selected');
 
     for(var i in COLORING) {
         $('.fractal-infos .coloring select').append('<option value="'+COLORING[i]+'">'+COLORING[i]+'</option>')
@@ -83,7 +84,13 @@
     $('button.update').click( function(e) {
         e.preventDefault();
         
-        fractal.fractalType = $('.fractal-infos .fractype select').val();
+        var fractTypeSelected = $('.fractal-infos .fractype select').val();
+        var params = null;
+        if( fractTypeSelected == "julia" ) {
+            params = {cx: -0.98, cy: 0.34};
+        }
+        fractal.setFractalFunction( fractTypeSelected, params );
+
         fractal.coloringAlgorithm = $('.fractal-infos .coloring select').val();
         fractal.paletteOffset = parseInt($('.fractal-infos .palette-offset input').val());
         MAX_ITERATIONS = parseInt($('.fractal-infos .max-iterations input').val());
