@@ -49,15 +49,15 @@
     $('.fractal-infos .palette-offset input').val(fractal.paletteOffset);
     $('.fractal-infos .max-iterations input').val(MAX_ITERATIONS);
 
-    for(var i in Plugins) {
-        $('.fractal-infos .fractype select').append('<option value="'+i+'">'+Plugins[i].desc+'</option>')
+    for(var i in Plugins.fractals) {
+        $('.fractal-infos .fractype select').append('<option value="'+i+'">'+Plugins.fractals[i].desc+'</option>')
     }
     $('.fractal-infos .fractype select option[value=mandelbrot]').attr('selected', 'selected');
 
-    for(var i in COLORING) {
-        $('.fractal-infos .coloring select').append('<option value="'+COLORING[i]+'">'+COLORING[i]+'</option>')
+    for(var i in Plugins.pixelShaders) {
+        $('.fractal-infos .coloring select').append('<option value="'+i+'">'+Plugins.pixelShaders[i].desc+'</option>')
     }
-    $('.fractal-infos .coloring select').val(fractal.coloringAlgorithm);
+    $('.fractal-infos .coloring select option[value=real_escape_time]').attr('selected', 'selected');
 
     fractal.render(SCALE, PX, PY);
 
@@ -90,8 +90,8 @@
             params = {cx: -0.98, cy: 0.34};
         }
         fractal.setFractalFunction( fractTypeSelected, params );
+        fractal.setPixelShader( $('.fractal-infos .coloring select').val() );
 
-        fractal.coloringAlgorithm = $('.fractal-infos .coloring select').val();
         fractal.paletteOffset = parseInt($('.fractal-infos .palette-offset input').val());
         MAX_ITERATIONS = parseInt($('.fractal-infos .max-iterations input').val());
         

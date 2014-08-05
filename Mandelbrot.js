@@ -7,11 +7,6 @@ function log2(p) {
     return Math.log(p) * TO_LN2;
 }
 
-var COLORING = {
-    ESCAPE_TIME: 'Escape Time',
-    SMOOTH_ESCAPE_TIME: 'Smooth Escape Time' 
-};
-
 function Mandelbrot(canvas_id) {
 
     this.palette = [];
@@ -24,9 +19,9 @@ function Mandelbrot(canvas_id) {
     this.height = this.element.height * 2;
 
     this.paletteOffset = 100;
-    this.coloringAlgorithm = COLORING.SMOOTH_ESCAPE_TIME; 
+    this.coloringAlgorithm = Plugins.pixelShaders.real_escape_time.shader; 
 
-    this.fractalFunc = Plugins.mandelbrot.iterator;
+    this.fractalFunc = Plugins.fractals.mandelbrot.iterator;
     this.pluginParams = null;
 
     var _width  = 1.0 / this.width;
@@ -42,10 +37,12 @@ function Mandelbrot(canvas_id) {
     }
 
     this.setFractalFunction = function(funcname, params) {
-        if( params ) {
-            this.pluginParams = params;
-            this.fractalFunc  = Plugins[funcname].iterator;
-        }
+        this.pluginParams = params;
+        this.fractalFunc  = Plugins.fractals[funcname].iterator;
+    }
+
+    this.setPixelShader = function(funcname) {
+        this.coloringAlgorithm  = Plugins.pixelShaders[funcname].shader;
     }
 
     this.getPaletteColor = function(p) {
@@ -90,22 +87,7 @@ function Mandelbrot(canvas_id) {
                 if( converge ) {
                     iterationsMap[j][i] = -1;
                 } else {
-                    switch( this.coloringAlgorithm ) {
-                        case COLORING.ESCAPE_TIME:
-                            iterationsMap[j][i] = mandelbrot_plugin_data.n / MAX_ITERATIONS;
-                            break;
-                        case COLORING.SMOOTH_ESCAPE_TIME:
-                            var lnDivisor = TO_LN2;
-                            // if(this.fractalFunc == FRACTAL.MANDELBROT_CUBIC) {
-                            //     lnDivisor = 1.0 / Math.log(3);
-                            // }
-
-                            iterationsMap[j][i] = (mandelbrot_plugin_data.n + 1 + Math.log(Math.log(CONVERGENCE_RADIUS_SQ) - Math.log(Math.log(Math.sqrt(mandelbrot_plugin_data.mod)))) * lnDivisor) / MAX_ITERATIONS;
-                            break;
-                        default:
-                            console.error('A coloring algorithm must be set.');
-                            return;
-                    }
+                    iterationsMap[j][i] = this.coloringAlgorithm();
                 }
 
                 x += scale_w;

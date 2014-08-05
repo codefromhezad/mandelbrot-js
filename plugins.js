@@ -5,93 +5,121 @@ function pass_data(dataObj) {
 	return false;
 }
 
+function get_data(dataKey) {
+	if( dataKey ) {
+		return window.mandelbrot_plugin_data[dataKey];
+	} else {
+		return window.mandelbrot_plugin_data;
+	}
+}
+
 var Plugins = {
-	mandelbrot: {
-		desc: "Mandelbrot Z = Z * Z + c",
-		iterator: function(x, y, params) {
-			var Zx = 0.0;
-		    var Zy = 0.0;
+	fractals: {
+		mandelbrot: {
+			desc: "Mandelbrot Z = Z * Z + c",
+			iterator: function(x, y, params) {
+				var Zx = 0.0;
+			    var Zy = 0.0;
 
-		    var converge = true;
-		    var xx = Zx * Zx;
-		    var yy = Zy * Zy;
-		    var mod = xx + yy;
+			    var converge = true;
+			    var xx = Zx * Zx;
+			    var yy = Zy * Zy;
+			    var mod = xx + yy;
 
-			for(var n = 0; n < MAX_ITERATIONS; n++) {
-		        //Z = Z * Z + c
-		        Zy = y + 2 * Zx * Zy;
-		        Zx = x + xx - yy;
+				for(var n = 0; n < MAX_ITERATIONS; n++) {
+			        //Z = Z * Z + c
+			        Zy = y + 2 * Zx * Zy;
+			        Zx = x + xx - yy;
 
-		        xx = Zx * Zx;
-		        yy = Zy * Zy;
-		        mod = xx + yy;
+			        xx = Zx * Zx;
+			        yy = Zy * Zy;
+			        mod = xx + yy;
 
-		        if( mod > CONVERGENCE_RADIUS_SQ ) {
-		            return pass_data({mod: mod, n: n});
-		        }
-		    }
+			        if( mod > CONVERGENCE_RADIUS_SQ ) {
+			            return pass_data({mod: mod, n: n, degree: 2});
+			        }
+			    }
 
-		    return true;
+			    return true;
+			},
 		},
+		mandelbrot_cubic: {
+			desc: "Cubic Mandelbrot Z = Z * Z * Z + c",
+			iterator: function(x, y, params) {
+
+				var Zx = 0.0;
+			    var Zy = 0.0;
+
+			    var converge = true;
+			    var xx = Zx * Zx;
+			    var yy = Zy * Zy;
+			    var mod = xx + yy;
+
+				for(var n = 0; n < MAX_ITERATIONS; n++) {
+			        //Z = Z * Z * Z + c
+			        Zx = x + xx * Zx - 3 * Zx * yy;
+			        Zy = y + 3 * xx * Zy - yy * Zy;
+
+			        xx = Zx * Zx;
+			        yy = Zy * Zy;
+			        mod = xx + yy;
+
+			        if( mod > CONVERGENCE_RADIUS_SQ ) {
+			            return pass_data({mod: mod, n: n, degree: 3});
+			        }
+			    }
+
+			    return true;
+			},
+		},
+		julia: {
+			desc: "Julia Z = Z * Z + c",
+			iterator: function(x, y, params) {
+				var Zx = x;
+			    var Zy = y;
+
+			    var cx = params.cx;
+			    var cy = params.cy;
+
+			    var xx = Zx * Zx;
+			    var yy = Zy * Zy;
+			    var mod = xx + yy;
+
+			    for(var n = 0; n < MAX_ITERATIONS; n++) {
+			        //Z = Z * Z + c
+			        Zy = cy + 2 * Zx * Zy;
+			        Zx = cx + xx - yy;
+
+			        xx = Zx * Zx;
+			        yy = Zy * Zy;
+
+			        mod = xx + yy;
+
+			        if( mod > CONVERGENCE_RADIUS_SQ ) {
+			            return pass_data({mod: mod, n: n, degree: 2});
+			        }
+			    }
+
+			    return false;
+			},
+		}
 	},
-	mandelbrot_cubic: {
-		desc: "Cubic Mandelbrot Z = Z * Z * Z + c",
-		iterator: function(x, y, params) {
 
-			var Zx = 0.0;
-		    var Zy = 0.0;
-
-		    var converge = true;
-		    var xx = Zx * Zx;
-		    var yy = Zy * Zy;
-		    var mod = xx + yy;
-
-			for(var n = 0; n < MAX_ITERATIONS; n++) {
-		        //Z = Z * Z * Z + c
-		        Zx = x + xx * Zx - 3 * Zx * yy;
-		        Zy = y + 3 * xx * Zy - yy * Zy;
-
-		        xx = Zx * Zx;
-		        yy = Zy * Zy;
-		        mod = xx + yy;
-
-		        if( mod > CONVERGENCE_RADIUS_SQ ) {
-		            return pass_data({mod: mod, n: n});
-		        }
-		    }
-
-		    return true;
+	pixelShaders: {
+		escape_time: {
+			desc: "Escape Time",
+			shader: function() {
+				return get_data('n') / MAX_ITERATIONS;
+			}
 		},
-	},
-	julia: {
-		desc: "Julia Z = Z * Z + c",
-		iterator: function(x, y, params) {
-			var Zx = x;
-		    var Zy = y;
 
-		    var cx = params.cx;
-		    var cy = params.cy;
+		real_escape_time: {
+			desc: "Real Escape Time",
+			shader: function() {
+				var lnDivisor = 1.0 / get_data('degree');
 
-		    var xx = Zx * Zx;
-		    var yy = Zy * Zy;
-		    var mod = xx + yy;
-
-		    for(var n = 0; n < MAX_ITERATIONS; n++) {
-		        //Z = Z * Z + c
-		        Zy = cy + 2 * Zx * Zy;
-		        Zx = cx + xx - yy;
-
-		        xx = Zx * Zx;
-		        yy = Zy * Zy;
-
-		        mod = xx + yy;
-
-		        if( mod > CONVERGENCE_RADIUS_SQ ) {
-		            return pass_data({mod: mod, n: n});
-		        }
-		    }
-
-		    return false;
-		},
+                return (get_data('n') + 1 + Math.log(Math.log(CONVERGENCE_RADIUS_SQ) - Math.log(Math.log(Math.sqrt(get_data('mod'))))) * lnDivisor) / MAX_ITERATIONS;
+			}
+		}
 	}
 }
