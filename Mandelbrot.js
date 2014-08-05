@@ -30,9 +30,9 @@ function Mandelbrot(canvas_id) {
     var imageData = this.context.createImageData(this.width * 0.5 | 0, this.height * 0.5 | 0);
 
     this.buildDefaultPalette = function() {
-        for(var p = 0; p < 512; p++) {
-            var a = Math.PI * 2.0 * p / 512
-            this.palette[p] = [ 128 - 127 * Math.cos(a), 128 - 127 * Math.sin(a), 128 - 127 * Math.sin(a) ];
+        for(var p = 0; p < 256; p++) {
+            var a = Math.PI * 2.0 * p / 256
+            this.palette[p] = [ 128 + 127 * Math.cos(a), 128 + 127 * Math.cos(a), 128 - 127 * Math.sin(a) ];
         }
     }
 
@@ -42,7 +42,7 @@ function Mandelbrot(canvas_id) {
     }
 
     this.setPixelShader = function(funcname) {
-        this.coloringAlgorithm  = Plugins.pixelShaders[funcname].shader;
+        this.coloringAlgorithm = Plugins.pixelShaders[funcname].shader;
     }
 
     this.getPaletteColor = function(p) {
