@@ -18,7 +18,7 @@ function Mandelbrot(canvas_id) {
     this.width  = this.element.width * 2;
     this.height = this.element.height * 2;
 
-    this.paletteOffset = 100;
+    this.paletteOffset = 70;
     this.coloringAlgorithm = Plugins.pixelShaders.real_escape_time.shader; 
 
     this.fractalFunc = Plugins.fractals.mandelbrot.iterator;
@@ -49,7 +49,18 @@ function Mandelbrot(canvas_id) {
         if(p < 0) {
             return [0, 0, 0];
         }
-        return this.palette[ (this.palette.length * Math.max(0, p + this.paletteOffset)) % (this.palette.length - 1) | 0 ];
+        var p0 = this.palette[ Math.floor(Math.max(0, p * MAX_ITERATIONS + this.paletteOffset)) % (this.palette.length - 1) | 0 ];
+        var p1 = this.palette[ Math.floor(Math.max(0, p * MAX_ITERATIONS + 1 + this.paletteOffset)) % (this.palette.length - 1) | 0 ];
+        
+        var t = p % 1;
+        
+        var c = [
+            Math.floor(p1[0] * t + p0[0] * (1 - t)),
+            Math.floor(p1[1] * t + p0[1] * (1 - t)),
+            Math.floor(p1[2] * t + p0[2] * (1 - t)),
+        ];
+
+        return c;
     }
 
     this.canvasToFractalCoords = function(p) {

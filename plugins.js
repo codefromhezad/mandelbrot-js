@@ -118,7 +118,7 @@ var Plugins = {
 			shader: function() {
 				var lnDivisor = 1.0 / get_data('degree');
 
-                return (get_data('n') + 1 + Math.log(Math.log(CONVERGENCE_RADIUS_SQ) - Math.log(Math.log(Math.sqrt(get_data('mod'))))) * lnDivisor) / MAX_ITERATIONS;
+                return (get_data('n') + (Math.log(Math.log(CONVERGENCE_RADIUS)) - Math.log(Math.log(Math.sqrt(get_data('mod'))))) * lnDivisor) / MAX_ITERATIONS;
 			}
 		}
 	}
