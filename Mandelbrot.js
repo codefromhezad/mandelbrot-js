@@ -18,8 +18,9 @@ function Mandelbrot(canvas_id) {
     this.width  = this.element.width * 2;
     this.height = this.element.height * 2;
 
-    this.paletteOffset = 70;
-    this.coloringAlgorithm = Plugins.pixelShaders.real_escape_time.shader; 
+    this.paletteMultiplier = 1;
+    this.paletteOffset = 10;
+    this.coloringAlgorithm = Plugins.pixelShaders.point_orbit_trap.shader; 
 
     this.fractalFunc = Plugins.fractals.mandelbrot.iterator;
     this.pluginParams = null;
@@ -30,9 +31,9 @@ function Mandelbrot(canvas_id) {
     var imageData = this.context.createImageData(this.width * 0.5 | 0, this.height * 0.5 | 0);
 
     this.buildDefaultPalette = function() {
-        for(var p = 0; p < 256; p++) {
-            var a = Math.PI * 2.0 * p / 256
-            this.palette[p] = [ 128 + 127 * Math.cos(a), 128 + 127 * Math.cos(a), 128 - 127 * Math.sin(a) ];
+        for(var p = 0; p < 512; p++) {
+            var a = Math.PI * 2.0 * p / 512;
+            this.palette[p] = [ 200 - 50 * Math.cos(a), 100 - 80 * Math.cos(a), 128 + 127 * Math.sin(a) ];
         }
     }
 
@@ -49,18 +50,8 @@ function Mandelbrot(canvas_id) {
         if(p < 0) {
             return [0, 0, 0];
         }
-        var p0 = this.palette[ Math.floor(Math.max(0, p * MAX_ITERATIONS + this.paletteOffset)) % (this.palette.length - 1) | 0 ];
-        var p1 = this.palette[ Math.floor(Math.max(0, p * MAX_ITERATIONS + 1 + this.paletteOffset)) % (this.palette.length - 1) | 0 ];
-        
-        var t = p % 1;
-        
-        var c = [
-            Math.floor(p1[0] * t + p0[0] * (1 - t)),
-            Math.floor(p1[1] * t + p0[1] * (1 - t)),
-            Math.floor(p1[2] * t + p0[2] * (1 - t)),
-        ];
 
-        return c;
+        return this.palette[ Math.floor( Math.max(0, this.paletteMultiplier * p * this.palette.length + this.paletteOffset)) % (this.palette.length - 1) | 0 ];
     }
 
     this.canvasToFractalCoords = function(p) {
@@ -73,6 +64,7 @@ function Mandelbrot(canvas_id) {
         var scale_w = _width * scale;
 
         var iterationsMap = [];
+        var maxMapValue = 0;
 
         if( ! this.palette.length ) {
             this.buildDefaultPalette();
@@ -99,6 +91,9 @@ function Mandelbrot(canvas_id) {
                     iterationsMap[j][i] = -1;
                 } else {
                     iterationsMap[j][i] = this.coloringAlgorithm();
+                    if( iterationsMap[j][i] > maxMapValue ) {
+                        maxMapValue = iterationsMap[j][i];
+                    }
                 }
 
                 x += scale_w;
@@ -109,14 +104,15 @@ function Mandelbrot(canvas_id) {
         
         // Second pass. Actual rendering
         var imgIndex = 0;
+        var maxValDiv = 1.0 / maxMapValue;
 
         for (var j = 0; j < this.height; j+=2) {
             for (var i = 0; i < this.width; i+=2) {
 
-                var p = this.getPaletteColor(iterationsMap[j][i]);
-                var p2 = this.getPaletteColor(iterationsMap[j][i+1]);
-                var p3 = this.getPaletteColor(iterationsMap[j+1][i]);
-                var p4 = this.getPaletteColor(iterationsMap[j+1][i+1]);
+                var p = this.getPaletteColor(iterationsMap[j][i] * maxValDiv);
+                var p2 = this.getPaletteColor(iterationsMap[j][i+1] * maxValDiv);
+                var p3 = this.getPaletteColor(iterationsMap[j+1][i] * maxValDiv);
+                var p4 = this.getPaletteColor(iterationsMap[j+1][i+1] * maxValDiv);
 
                 var r = ((p[0] + p2[0] + p3[0] + p4[0]) * 0.25) | 0;
                 var g = ((p[1] + p2[1] + p3[1] + p4[1]) * 0.25) | 0;

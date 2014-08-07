@@ -40,7 +40,7 @@
     var PX = - 0.5;
     var PY = - 0.0;
 
-    var MAX_ITERATIONS = 200;
+    var MAX_ITERATIONS = 40;
 
     var fractal = new Mandelbrot('canvas1');
 
@@ -57,7 +57,7 @@
     for(var i in Plugins.pixelShaders) {
         $('.fractal-infos .coloring select').append('<option value="'+i+'">'+Plugins.pixelShaders[i].desc+'</option>')
     }
-    $('.fractal-infos .coloring select option[value=real_escape_time]').attr('selected', 'selected');
+    $('.fractal-infos .coloring select option[value=point_orbit_trap]').attr('selected', 'selected');
 
     fractal.render(SCALE, PX, PY);
 

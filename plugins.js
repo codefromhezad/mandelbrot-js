@@ -22,9 +22,10 @@ var Plugins = {
 			    var Zy = 0.0;
 
 			    var converge = true;
-			    var xx = Zx * Zx;
-			    var yy = Zy * Zy;
-			    var mod = xx + yy;
+			    var xx = 0;
+			    var yy = 0;
+			    var mod = 0;
+			    var minidist = 100000;
 
 				for(var n = 0; n < MAX_ITERATIONS; n++) {
 			        //Z = Z * Z + c
@@ -35,12 +36,12 @@ var Plugins = {
 			        yy = Zy * Zy;
 			        mod = xx + yy;
 
-			        if( mod > CONVERGENCE_RADIUS_SQ ) {
-			            return pass_data({mod: mod, n: n, degree: 2});
+			        if( mod < minidist ) {
+			        	minidist = mod;
 			        }
 			    }
 
-			    return true;
+			    return pass_data({dist: Math.sqrt(minidist), mod: mod, n: n, degree: 2});
 			},
 		},
 		mandelbrot_cubic: {
@@ -119,6 +120,13 @@ var Plugins = {
 				var lnDivisor = 1.0 / get_data('degree');
 
                 return (get_data('n') + (Math.log(Math.log(CONVERGENCE_RADIUS)) - Math.log(Math.log(Math.sqrt(get_data('mod'))))) * lnDivisor) / MAX_ITERATIONS;
+			}
+		},
+
+		point_orbit_trap: {
+			desc: "Orbit trap point min(Z)",
+			shader: function() {
+                return get_data('dist');
 			}
 		}
 	}
