@@ -19,7 +19,7 @@ function Mandelbrot(canvas_id) {
     this.height = this.element.height * 2;
 
     this.paletteMultiplier = 1;
-    this.paletteOffset = 10;
+    this.paletteOffset = 220;
     this.coloringAlgorithm = Plugins.pixelShaders.point_orbit_trap.shader; 
 
     this.fractalFunc = Plugins.fractals.mandelbrot.iterator;
