@@ -26,8 +26,6 @@
 <dl class="fractal-infos">
     <dt>Scale</dt><dd class="scale">...<dd/>
     <dt>Position</dt><dd class="position">...<dd/>
-    <dt>Fractal type</dt><dd class="fractype"><select></select><dd/>
-    <dt>Coloring Algorithm</dt><dd class="coloring"><select></select><dd/>
     <dt>Max Iterations</dt><dd class="max-iterations"><input type="text" /><dd/>
     <dt>Palette Offset</dt><dd class="palette-offset"><input type="text" /><dd/>
 </dl>
@@ -49,17 +47,7 @@
     $('.fractal-infos .palette-offset input').val(fractal.paletteOffset);
     $('.fractal-infos .max-iterations input').val(MAX_ITERATIONS);
 
-    for(var i in Plugins.fractals) {
-        $('.fractal-infos .fractype select').append('<option value="'+i+'">'+Plugins.fractals[i].desc+'</option>')
-    }
-    $('.fractal-infos .fractype select option[value=mandelbrot]').attr('selected', 'selected');
-
-    for(var i in Plugins.pixelShaders) {
-        $('.fractal-infos .coloring select').append('<option value="'+i+'">'+Plugins.pixelShaders[i].desc+'</option>')
-    }
-    $('.fractal-infos .coloring select option[value=point_orbit_trap]').attr('selected', 'selected');
-
-    fractal.render(SCALE, PX, PY);
+    fractal.render(SCALE, PX, PY, true);
 
     $('#canvas1').click( function(e) {
         var posX = $(this).offset().left,
@@ -78,24 +66,16 @@
         $('.fractal-infos .scale').text(SCALE);
         $('.fractal-infos .position').text(PX+', '+PY);
 
-        fractal.render(SCALE, PX, PY);
+        fractal.render(SCALE, PX, PY, true);
     });
 
     $('button.update').click( function(e) {
         e.preventDefault();
-        
-        var fractTypeSelected = $('.fractal-infos .fractype select').val();
-        var params = null;
-        if( fractTypeSelected == "julia" ) {
-            params = {cx: -0.98, cy: 0.34};
-        }
-        fractal.setFractalFunction( fractTypeSelected, params );
-        fractal.setPixelShader( $('.fractal-infos .coloring select').val() );
 
         fractal.paletteOffset = parseInt($('.fractal-infos .palette-offset input').val());
         MAX_ITERATIONS = parseInt($('.fractal-infos .max-iterations input').val());
         
-        fractal.render(SCALE, PX, PY);
+        fractal.render(SCALE, PX, PY, true);
 
         return false;
     })
