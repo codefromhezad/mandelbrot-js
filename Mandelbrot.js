@@ -19,16 +19,29 @@ function Mandelbrot(canvas_id) {
     this.height = this.element.height*2;
 
     this.paletteMultiplier = 1;
-    this.paletteOffset = 220;
+    this.paletteOffset = 512;
 
     this.fractalFunc = Plugins.mandelbrot_orbit_trap.iterator;
 
     this.is_preview = false;
 
     this.buildDefaultPalette = function() {
-        for(var p = 0; p < 512; p++) {
-            var a = Math.PI * 2.0 * p / 512;
-            this.palette[p] = [ 200 - 50 * Math.cos(a), 100 - 80 * Math.cos(a), 128 + 127 * Math.sin(a) ];
+        var palette_size = 512;
+
+        for(var p = 0; p < palette_size; p++) {
+            var r = 127 + (255 - 127) * p / palette_size;
+            var g = 36 + (212 - 36) * p / palette_size;
+            var b = 0 + (80 - 0) * p / palette_size;
+            
+            this.palette[p] = [ r, g, b ];
+        }
+
+        for(var p = 0; p < palette_size; p++) {
+            var r = 127 + (255 - 127) * (1 - p / palette_size);
+            var g = 36 + (212 - 36) * (1 - p / palette_size);
+            var b = 0 + (80 - 0) * (1 - p / palette_size);
+            
+            this.palette[p + palette_size] = [ r, g, b ];
         }
     }
 
@@ -69,7 +82,7 @@ function Mandelbrot(canvas_id) {
 
             var _width  = 1.0 / this.width;
             var _height = 1.0 / this.height;
-            
+
             var imageData = this.context.createImageData(this.width * 0.5 | 0, this.height * 0.5 | 0);
         }
 
@@ -112,7 +125,6 @@ function Mandelbrot(canvas_id) {
         
         // Second pass. Actual rendering
         var imgIndex = 0;
-        var maxValDiv = 1.0 / maxMapValue;
         var screenIter = 2;
 
         if( preview ) {
@@ -121,12 +133,12 @@ function Mandelbrot(canvas_id) {
         for (var j = 0; j < this.height; j+=screenIter) {
             for (var i = 0; i < this.width; i+=screenIter) {
 
-                var p = this.getPaletteColor(iterationsMap[j][i] * maxValDiv);
+                var p = this.getPaletteColor(iterationsMap[j][i]);
                 
                 if( ! preview ) {
-                    var p2 = this.getPaletteColor(iterationsMap[j][i+1] * maxValDiv);
-                    var p3 = this.getPaletteColor(iterationsMap[j+1][i] * maxValDiv);
-                    var p4 = this.getPaletteColor(iterationsMap[j+1][i+1] * maxValDiv);
+                    var p2 = this.getPaletteColor(iterationsMap[j][i+1]);
+                    var p3 = this.getPaletteColor(iterationsMap[j+1][i]);
+                    var p4 = this.getPaletteColor(iterationsMap[j+1][i+1]);
 
                     var r = ((p[0] + p2[0] + p3[0] + p4[0]) * 0.25) | 0;
                     var g = ((p[1] + p2[1] + p3[1] + p4[1]) * 0.25) | 0;
