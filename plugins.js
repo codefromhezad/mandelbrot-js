@@ -16,6 +16,14 @@ var Plugins = {
 		    var point_dist = 100000;
 		    var line_dist = 100000;
 
+		    var trapA = 1;
+		    var trapB = 1;
+
+		    var trapYOffset = 0;
+		    var trapXOffset = 0;
+
+		    var lineDiv = 1 / Math.sqrt(trapA * trapA + trapB * trapB);
+
 			for(var n = 0; n < MAX_ITERATIONS; n++) {
 		        //Z = Z * Z + c
 		        Zy = y + 2 * Zx * Zy;
@@ -25,7 +33,8 @@ var Plugins = {
 		        yy = Zy * Zy;
 
 		        mod = xx + yy;
-		        mod2 = Math.min(xx, yy);
+		        mod2 = Math.abs(trapA * (Zx - trapXOffset) + trapB * Zy + trapYOffset) * lineDiv *
+		        	   Math.abs(-trapA * (Zx - trapXOffset) + trapB * Zy + trapYOffset) * lineDiv;
 
 		        if( mod < point_dist ) {
 		        	point_dist = mod;
@@ -37,7 +46,7 @@ var Plugins = {
 		    }
 
 		    //return Math.sqrt(Math.sqrt(point_dist));
-		    return Math.sqrt(Math.sqrt(line_dist));
+		    return Math.sqrt(Math.sqrt(line_dist / point_dist));
 		},
 	},
 	
